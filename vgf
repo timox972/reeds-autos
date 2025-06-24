@@ -1,9 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Concessionnaire GTA RP</title>
+  <style>
+    #cartModal {
+      display: none;
+      position: fixed;
+      top: 10%;
+      left: 10%;
+      width: 80%;
+      max-width: 600px;
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      z-index: 1000;
+    }
+    #cartItems {
+      list-style: none;
+      padding: 0;
+    }
+    #cartItems li {
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+    #cartItems button {
+      margin-left: 10px;
+      background-color: #ff4d4d;
+      border: none;
+      color: white;
+      cursor: pointer;
+      padding: 3px 8px;
+      border-radius: 3px;
+    }
+    #cartItems button:hover {
+      background-color: #ff1a1a;
+    }
+  </style>
+</head>
+<body>
+
 <button id="openCartBtn">Voir le panier (<span id="cartCount">0</span>)</button>
 
-<div id="cartModal" style="display:none; position:fixed; top:10%; left:10%; width:80%; max-width:600px; background:#fff; border:1px solid #ccc; padding:20px; box-shadow: 0 0 10px rgba(0,0,0,0.3); z-index:1000;">
+<div id="cartModal">
   <button id="closeCartBtn" style="float:right; cursor:pointer;">Fermer</button>
   <h2>Votre panier</h2>
-  <ul id="cartItems" style="list-style:none; padding:0;"></ul>
+  <ul id="cartItems"></ul>
   <p>Total : <span id="cartTotal">$0</span></p>
   <textarea id="orderSummary" rows="5" style="width:100%;"></textarea>
 </div>
@@ -60,28 +103,17 @@
     document.getElementById('cartCount').textContent = cart.length;
   };
 
-  const calcTotal = () => cart.reduce((s, v) => s + v[1], 0);
+  const calcTotal = () => cart.reduce((sum, v) => sum + v[1], 0);
 
   function renderCart() {
     const items = document.getElementById('cartItems');
     items.innerHTML = '';
-
     cart.forEach((v, index) => {
       const li = document.createElement('li');
-      li.style.marginBottom = '8px';
-      li.style.fontSize = '16px';
       li.textContent = `${v[0]} - ${formatPrice(v[1])}`;
 
       const removeBtn = document.createElement('button');
-      removeBtn.textContent = '🗑️';
-      removeBtn.style.marginLeft = '10px';
-      removeBtn.style.background = 'none';
-      removeBtn.style.border = 'none';
-      removeBtn.style.cursor = 'pointer';
-      removeBtn.style.color = 'red';
-      removeBtn.style.fontSize = '16px';
-      removeBtn.style.verticalAlign = 'middle';
-
+      removeBtn.textContent = 'Supprimer';
       removeBtn.onclick = () => {
         cart.splice(index, 1);
         localStorage.setItem('cart', JSON.stringify(cart));
@@ -115,23 +147,18 @@
     const card = document.createElement('div');
     card.className = 'vehicle-card';
     card.style.border = '1px solid #ccc';
-    card.style.borderRadius = '5px';
     card.style.padding = '10px';
     card.style.width = '150px';
     card.style.textAlign = 'center';
 
     const title = document.createElement('h3');
     title.textContent = v[0];
-    title.style.fontSize = '16px';
-    title.style.margin = '5px 0';
 
     const price = document.createElement('p');
     price.textContent = formatPrice(v[1]);
-    price.style.margin = '5px 0';
 
     const btn = document.createElement('button');
     btn.textContent = 'Ajouter au panier';
-    btn.style.cursor = 'pointer';
     btn.onclick = () => {
       cart.push(v);
       localStorage.setItem('cart', JSON.stringify(cart));
@@ -142,3 +169,6 @@
     vehicleList.appendChild(card);
   });
 </script>
+
+</body>
+</html>
