@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Concessionnaire LS - Voitures à vendre</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 1rem;
+      background: #f4f4f4;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .vehicle-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+    }
+    .vehicle-card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 6px rgba(0,0,0,0.1);
+      padding: 1rem;
+      width: 220px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .vehicle-card img {
+      width: 200px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 5px;
+      margin-bottom: 0.8rem;
+    }
+    .vehicle-card h3 {
+      margin: 0.2rem 0;
+      font-size: 1.1rem;
+    }
+    .vehicle-card p {
+      margin: 0.1rem 0 1rem;
+      font-weight: bold;
+      color: #1abc9c;
+    }
+    .vehicle-card button {
+      padding: 0.5rem 1rem;
+      background: #1abc9c;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .vehicle-card button:hover {
+      background: #159e85;
+    }
+
+    /* Panier bouton fixe */
+    #openCartBtn {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      padding: 0.75rem 1.2rem;
+      background: #1abc9c;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      z-index: 1000;
+    }
+
+    /* Modal Panier */
+    #cartModal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 1100;
+    }
+    #cartModal > div {
+      background: #fff;
+      color: #222;
+      padding: 1.5rem;
+      border-radius: 8px;
+      max-width: 400px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      position: relative;
+    }
+    #cartItems {
+      list-style: none;
+      padding-left: 0;
+      margin-bottom: 1rem;
+    }
+    #cartItems li {
+      margin-bottom: 0.5rem;
+    }
+    #closeCartBtn {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #888;
+    }
+    #closeCartBtn:hover {
+      color: #000;
+    }
+    #orderSummary {
+      width: 100%;
+      height: 100px;
+      resize: none;
+      margin-top: 0.5rem;
+    }
+    #finalizeBtn {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      background: #1abc9c;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #finalizeBtn:hover {
+      background: #159e85;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Concessionnaire LS - Voitures à vendre</h1>
+
+  <div class="vehicle-list" id="vehicleList">
+    <!-- Les véhicules seront ajoutés ici dynamiquement -->
+  </div>
+
+  <!-- Bouton ouvrir panier -->
+  <button id="openCartBtn">Panier (<span id="cartCount">0</span>)</button>
+
+  <!-- Modal Panier -->
+  <div id="cartModal">
+    <div>
+      <button id="closeCartBtn">&times;</button>
+      <h3>Votre panier</h3>
+      <ul id="cartItems"></ul>
+      <p><strong>Total : </strong><span id="cartTotal">$0</span></p>
+
+      <p>Copiez la liste ci-dessous et collez-la dans le formulaire Google :</p>
+      <textarea id="orderSummary" readonly></textarea>
+
+      <a id="finalizeBtn" href="TON_LIEN_GOOGLE_FORM" target="_blank" rel="noopener noreferrer">
+        Finaliser l'achat (Google Form)
+      </a>
+    </div>
+  </div>
+
+  <script>
+    // Exemple de véhicules (à adapter selon ton stock)
+    const vehicles = [
+      { id: 1, name: 'Benefactor Dubsta', price: 49990, image: 'https://cdn.gta5-mods.com/screenshots/benefactor-dubsta_87f493-600x338.jpg' },
+      { id: 2, name: 'Albany Primo', price: 17500, image: 'https://cdn.gta5-mods.com/screenshots/primmo_5585b2-600x338.jpg' },
+      { id: 3, name: 'Bravado Bison', price: 22000, image: 'https://cdn.gta5-mods.com/screenshots/bravado-bison_68f2f0-600x338.jpg' },
+      { id: 4, name: 'Canis Mesa', price: 27000, image: 'https://cdn.gta5-mods.com/screenshots/canis-mesa_6318b6-600x338.jpg' },
+      { id: 5, name: 'Vapid Dominator', price: 41000, image: 'https://cdn.gta5-mods.com/screenshots/vapid-dominator_7fbb21-600x338.jpg' },
+      { id: 6, name: 'Obey Rocoto', price: 38000, image: 'https://cdn.gta5-mods.com/screenshots/obey-rocoto_23f560-600x338.jpg' },
+      { id: 7, name: 'Karin Rebel', price: 15000, image: 'https://cdn.gta5-mods.com/screenshots/karin-rebel_fcd69e-600x338.jpg' }
+    ];
+
+    // Affiche les véhicules dans la page
+    const vehicleList = document.getElementById('vehicleList');
+
+    vehicles.forEach(vehicle => {
+      const card = document.createElement('div');
+      card.className = 'vehicle-card';
+      card.innerHTML = `
+        <img src="${vehicle.image}" alt="${vehicle.name}" />
+        <h3>${vehicle.name}</h3>
+        <p>${formatPrice(vehicle.price)}</p>
+        <button data-id="${vehicle.id}">Ajouter au panier</button>
+      `;
+      vehicleList.appendChild(card);
+    });
+
+    // Panier stocké en localStorage
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+    const cartCount = document.getElementById('cartCount');
+    const cartModal = document.getElementById('cartModal');
+    const cartItems = document.getElementById('cartItems');
+    const cartTotal = document.getElementById('cartTotal');
+    const openCartBtn = document.getElementById('openCartBtn');
+    const closeCartBtn = document.getElementById('closeCartBtn');
+    const orderSummary = document.getElementById('orderSummary');
+    const finalizeBtn = document.getElementById('finalizeBtn');
+
+    // Mets à jour le compteur du panier
+    function updateCartCount() {
+      cartCount.textContent = cart.length;
+    }
+
+    // Formate un prix en $ avec séparateur de milliers
+    function formatPrice(price) {
+      return '$' + price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    }
+
+    // Calcule le total du panier
+    function calcTotal() {
+      return cart.reduce((sum, v) => sum + v.price, 0);
+    }
+
+    // Affiche le contenu du panier dans la modal
+    function renderCart() {
+      cartItems.innerHTML = '';
+      if (cart.length === 0) {
+        cartItems.innerHTML = '<li>Votre panier est vide.</li>';
+        cartTotal.textContent = '$0';
+        orderSummary.value = '';
+        return;
+      }
+      cart.forEach(v => {
+        const li = document.createElement('li');
+        li.textContent = `${v.name} - ${formatPrice(v.price)}`;
+        cartItems.appendChild(li);
+      });
+      cartTotal.textContent = formatPrice(calcTotal());
+
+      // Générer résumé commande pour Google Form
+      let summaryText = cart.map(v => `${v.name} (${formatPrice(v.price)})`).join('\n');
+      summaryText += `\n\nTotal : ${formatPrice(calcTotal())}`;
+      orderSummary.value = summaryText;
+    }
+
+    // Ajouter un véhicule au panier
+    function addToCart(vehicleId) {
+      const vehicle = vehicles.find(v => v.id === vehicleId);
+      if (!vehicle) return;
+      cart.push(vehicle);
+      localStorage.setItem('cart', JSON.stringify(cart));
+      updateCartCount();
+      alert(`${vehicle.name} ajouté au panier !`);
+    }
+
+    // Gestion des boutons ajouter au panier
+    document.querySelectorAll('.vehicle-card button').forEach(button => {
+      button.addEventListener('click', () => {
+        const id = parseInt(button.getAttribute('data-id'));
+        addToCart(id);
+      });
+    });
+
+    // Ouvrir modal panier
+    openCartBtn.addEventListener('click', () => {
+      renderCart();
+      cartModal.style.display = 'flex';
+    });
+
+    // Fermer modal panier
+    closeCartBtn.addEventListener('click', () => {
+      cartModal.style.display = 'none';
+    });
+
+    // Mise à jour initiale du compteur
+    updateCartCount();
+  </script>
+</body>
+</html>
