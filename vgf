@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <title>Concessionnaire GTA RP</title>
+  <meta charset="UTF-8">
+  <title>Panier GTA RP</title>
   <style>
     #cartModal {
       display: none;
@@ -17,112 +17,74 @@
       box-shadow: 0 0 10px rgba(0,0,0,0.3);
       z-index: 1000;
     }
-    #cartItems {
-      list-style: none;
-      padding: 0;
-    }
     #cartItems li {
       margin-bottom: 10px;
-      font-size: 16px;
     }
-    #cartItems button {
+    .remove-btn {
       margin-left: 10px;
-      background-color: #ff4d4d;
-      border: none;
+      background: red;
       color: white;
+      border: none;
+      padding: 4px 8px;
       cursor: pointer;
-      padding: 3px 8px;
-      border-radius: 3px;
-    }
-    #cartItems button:hover {
-      background-color: #ff1a1a;
     }
   </style>
 </head>
 <body>
 
+<!-- Bouton pour ouvrir le panier -->
 <button id="openCartBtn">Voir le panier (<span id="cartCount">0</span>)</button>
 
+<!-- Panier -->
 <div id="cartModal">
-  <button id="closeCartBtn" style="float:right; cursor:pointer;">Fermer</button>
+  <button id="closeCartBtn">Fermer</button>
   <h2>Votre panier</h2>
   <ul id="cartItems"></ul>
   <p>Total : <span id="cartTotal">$0</span></p>
   <textarea id="orderSummary" rows="5" style="width:100%;"></textarea>
 </div>
 
+<!-- Liste des véhicules -->
 <div id="vehicleList" style="display:flex; flex-wrap:wrap; gap:10px;"></div>
 
 <script>
   const vehicles = [
     ["Elegy Retro Custom", 904000],
     ["Grotti Turismo R", 500000],
-    ["Infernus Classic", 440000],
-    ["Ignus", 1900000],
-    ["Issi Classic", 30000],
-    ["Itali GTB Custom", 1725000],
-    ["Jester Classic", 784000],
-    ["Khamelion", 180000],
-    ["Krieger", 2875000],
-    ["Lynx", 1900000],
-    ["Massacro", 195000],
-    ["Monroe", 890000],
-    ["Neon", 1570000],
-    ["Nero", 1440000],
-    ["Nero Custom", 1560000],
-    ["Ninef", 225000],
-    ["Omnis", 810000],
-    ["Paragon R", 1420000],
-    ["Penumbra FF", 90000],
-    ["Pfister Comet", 100000],
-    ["Pfister Comet SR", 975000],
-    ["Rapid GT Classic", 335000],
-    ["Revolter", 1460000],
-    ["Ruston", 580000],
-    ["Schafter V12", 145000],
-    ["Schwarzer", 65000],
-    ["Sentinel XS", 55000],
-    ["Surano", 225000],
-    ["Tezeract", 2825000],
-    ["Turismo Classic", 500000],
-    ["Turismo R", 500000],
-    ["Turismo Omaggio", 2845000],
-    ["Tyrus", 2000000],
-    ["Vacca", 240000],
-    ["Vagner", 1535000],
-    ["Voltic", 150000],
-    ["Zentorno", 725000],
-    ["Zorrusso", 1845000]
+    ["Neon", 1570000]
   ];
 
-  let cart = JSON.parse(localStorage.getItem('cart')) || [];
+  let cart = [];
 
   const formatPrice = n => '$' + n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
-  const updateCount = () => {
+  function updateCount() {
     document.getElementById('cartCount').textContent = cart.length;
-  };
+  }
 
-  const calcTotal = () => cart.reduce((sum, v) => sum + v[1], 0);
+  function calcTotal() {
+    return cart.reduce((sum, item) => sum + item[1], 0);
+  }
 
   function renderCart() {
-    const items = document.getElementById('cartItems');
-    items.innerHTML = '';
-    cart.forEach((v, index) => {
-      const li = document.createElement('li');
-      li.textContent = `${v[0]} - ${formatPrice(v[1])}`;
+    const list = document.getElementById('cartItems');
+    list.innerHTML = '';
 
-      const removeBtn = document.createElement('button');
-      removeBtn.textContent = 'Supprimer';
-      removeBtn.onclick = () => {
+    cart.forEach((item, index) => {
+      const li = document.createElement('li');
+      li.textContent = `${item[0]} - ${formatPrice(item[1])}`;
+
+      const btn = document.createElement('button');
+      btn.textContent = 'Supprimer';
+      btn.className = 'remove-btn';
+      btn.onclick = () => {
         cart.splice(index, 1);
-        localStorage.setItem('cart', JSON.stringify(cart));
-        updateCount();
         renderCart();
+        updateCount();
       };
 
-      li.appendChild(removeBtn);
-      items.appendChild(li);
+      li.appendChild(btn);
+      list.appendChild(li);
     });
 
     document.getElementById('cartTotal').textContent = formatPrice(calcTotal());
@@ -131,43 +93,41 @@
       '\n\nTotal : ' + formatPrice(calcTotal());
   }
 
-  document.getElementById('openCartBtn').addEventListener('click', () => {
+  document.getElementById('openCartBtn').onclick = () => {
     renderCart();
     document.getElementById('cartModal').style.display = 'block';
-  });
+  };
 
-  document.getElementById('closeCartBtn').addEventListener('click', () => {
+  document.getElementById('closeCartBtn').onclick = () => {
     document.getElementById('cartModal').style.display = 'none';
-  });
-
-  updateCount();
+  };
 
   const vehicleList = document.getElementById('vehicleList');
-  vehicles.forEach(v => {
+  vehicles.forEach(vehicle => {
     const card = document.createElement('div');
-    card.className = 'vehicle-card';
     card.style.border = '1px solid #ccc';
     card.style.padding = '10px';
-    card.style.width = '150px';
-    card.style.textAlign = 'center';
 
     const title = document.createElement('h3');
-    title.textContent = v[0];
+    title.textContent = vehicle[0];
 
     const price = document.createElement('p');
-    price.textContent = formatPrice(v[1]);
+    price.textContent = formatPrice(vehicle[1]);
 
     const btn = document.createElement('button');
     btn.textContent = 'Ajouter au panier';
     btn.onclick = () => {
-      cart.push(v);
-      localStorage.setItem('cart', JSON.stringify(cart));
+      cart.push(vehicle);
       updateCount();
     };
 
-    card.append(title, price, btn);
+    card.appendChild(title);
+    card.appendChild(price);
+    card.appendChild(btn);
     vehicleList.appendChild(card);
   });
+
+  updateCount();
 </script>
 
 </body>
