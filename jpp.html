@@ -1,0 +1,118 @@
+<script>
+  const vehicles = [
+    ["Elegy Retro Custom", 904000],
+    ["Grotti Turismo R", 500000],
+    ["Infernus Classic", 440000],
+    ["Ignus", 1900000],
+    ["Issi Classic", 30000],
+    ["Itali GTB Custom", 1725000],
+    ["Jester Classic", 784000],
+    ["Khamelion", 180000],
+    ["Krieger", 2875000],
+    ["Lynx", 1900000],
+    ["Massacro", 195000],
+    ["Monroe", 890000],
+    ["Neon", 1570000],
+    ["Nero", 1440000],
+    ["Nero Custom", 1560000],
+    ["Ninef", 225000],
+    ["Omnis", 810000],
+    ["Paragon R", 1420000],
+    ["Penumbra FF", 90000],
+    ["Pfister Comet", 100000],
+    ["Pfister Comet SR", 975000],
+    ["Rapid GT Classic", 335000],
+    ["Revolter", 1460000],
+    ["Ruston", 580000],
+    ["Schafter V12", 145000],
+    ["Schwarzer", 65000],
+    ["Sentinel XS", 55000],
+    ["Surano", 225000],
+    ["Tezeract", 2825000],
+    ["Turismo Classic", 500000],
+    ["Turismo R", 500000],
+    ["Turismo Omaggio", 2845000],
+    ["Tyrus", 2000000],
+    ["Vacca", 240000],
+    ["Vagner", 1535000],
+    ["Voltic", 150000],
+    ["Zentorno", 725000],
+    ["Zorrusso", 1845000]
+  ];
+
+  let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+  const formatPrice = n => '$' + n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+  const updateCount = () => {
+    document.getElementById('cartCount').textContent = cart.length;
+  };
+
+  const calcTotal = () => cart.reduce((s, v) => s + v[1], 0);
+
+  function renderCart() {
+    const items = document.getElementById('cartItems');
+    items.innerHTML = '';
+
+    cart.forEach((v, index) => {
+      const li = document.createElement('li');
+      li.textContent = `${v[0]} - ${formatPrice(v[1])}`;
+      const removeBtn = document.createElement('button');
+      removeBtn.textContent = '🗑️';
+      removeBtn.style.marginLeft = '10px';
+      removeBtn.style.background = 'none';
+      removeBtn.style.border = 'none';
+      removeBtn.style.cursor = 'pointer';
+
+      const currentIndex = index;  // capture index for closure
+      removeBtn.onclick = () => {
+        cart.splice(currentIndex, 1);
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateCount();
+        renderCart();
+      };
+
+      li.appendChild(removeBtn);
+      items.appendChild(li);
+    });
+
+    document.getElementById('cartTotal').textContent = formatPrice(calcTotal());
+    document.getElementById('orderSummary').value =
+      cart.map(v => `${v[0]} (${formatPrice(v[1])})`).join('\n') +
+      '\n\nTotal : ' + formatPrice(calcTotal());
+  }
+
+  document.getElementById('openCartBtn').addEventListener('click', () => {
+    renderCart();
+    document.getElementById('cartModal').style.display = 'flex';
+  });
+
+  document.getElementById('closeCartBtn').addEventListener('click', () => {
+    document.getElementById('cartModal').style.display = 'none';
+  });
+
+  updateCount();
+
+  const vehicleList = document.getElementById('vehicleList');
+  vehicles.forEach(v => {
+    const card = document.createElement('div');
+    card.className = 'vehicle-card';
+
+    const title = document.createElement('h3');
+    title.textContent = v[0];
+
+    const price = document.createElement('p');
+    price.textContent = formatPrice(v[1]);
+
+    const btn = document.createElement('button');
+    btn.textContent = 'Ajouter au panier';
+    btn.onclick = () => {
+      cart.push(v);
+      localStorage.setItem('cart', JSON.stringify(cart));
+      updateCount();
+    };
+
+    card.append(title, price, btn);
+    vehicleList.appendChild(card);
+  });
+</script>
