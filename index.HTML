@@ -1,107 +1,37 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Reed Motors - Concession GTA RP</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Concession GTA RP</title>
   <style>
-    body { font-family: Arial,sans-serif; margin:1rem; background:#f4f4f4; }
-    h1 { text-align:center; margin-bottom:1rem; }
-    .vehicle-list { display:flex; flex-wrap:wrap; gap:1rem; justify-content:center; }
-    .vehicle-card {
-      background:#fff; border-radius:8px; box-shadow:0 0 6px rgba(0,0,0,0.1);
-      padding:1rem; width:200px; text-align:center;
-    }
-    .vehicle-card h3 { margin:0.5rem 0 0; font-size:1.05rem; }
-    .vehicle-card p { margin:0.3rem 0; font-weight:bold; color:#1abc9c; }
-    .vehicle-card button {
-      background:#1abc9c; color:white; border:none; padding:0.5rem; border-radius:5px;
-      cursor:pointer; transition:background 0.3s;
-    }
-    .vehicle-card button:hover { background:#159e85; }
-    #openCartBtn {
-      position:fixed; bottom:1rem; right:1rem; padding:0.75rem 1.2rem;
-      background:#1abc9c; color:#fff; border:none; border-radius:5px;
-      cursor:pointer; z-index:1000;
-    }
-    #cartModal {
-      display:none; position:fixed; top:0; left:0; width:100vw; height:100vh;
-      background:rgba(0,0,0,0.7); justify-content:center; align-items:center; z-index:1100;
-    }
-    #cartModal > div {
-      background:#fff; padding:1.5rem; border-radius:8px;
-      max-width:400px; width:90%; max-height:80vh; overflow-y:auto; position:relative;
-    }
-    #cartItems { list-style:none; padding-left:0; margin-bottom:1rem; }
-    #closeCartBtn {
-      position:absolute; top:0.5rem; right:0.5rem;
-      background:none; border:none; font-size:1.5rem; cursor:pointer; color:#888;
-    }
-    #orderSummary { width:100%; height:100px; resize:none; margin-top:0.5rem; }
-    #finalizeBtn {
-      display:inline-block; margin-top:1rem; padding:0.5rem 1rem;
-      background:#1abc9c; color:#fff; border-radius:5px; text-decoration:none;
-    }
-    #finalizeBtn:hover { background:#159e85; }
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .vehicle-card { border: 1px solid #ccc; padding: 10px; border-radius: 8px; width: 200px; }
+    #vehicleList { display: flex; flex-wrap: wrap; gap: 10px; }
+    #cartModal { display: none; position: fixed; top: 10%; left: 10%; width: 80%; max-width: 600px; background: #fff; border: 1px solid #ccc; padding: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.3); z-index: 1000; }
+    #cartItems li { margin-bottom: 10px; }
+    #cartItems button { background: none; border: none; cursor: pointer; color: red; font-size: 16px; }
   </style>
 </head>
 <body>
-
-  <h1>Reed Motors – Concession GTA RP</h1>
-  <div class="vehicle-list" id="vehicleList"></div>
-  <button id="openCartBtn">Panier (<span id="cartCount">0</span>)</button>
+  <h1>Concessionnaire GTA RP</h1>
+  <label for="buyerName">Nom de l'acheteur :</label>
+  <input type="text" id="buyerName" placeholder="Entrez votre nom">
+  <button id="openCartBtn">Voir le panier (<span id="cartCount">0</span>)</button>
 
   <div id="cartModal">
-    <div>
-      <button id="closeCartBtn">&times;</button>
-      <h3>Votre panier</h3>
-      <ul id="cartItems"></ul>
-      <p><strong>Total :</strong> <span id="cartTotal">$0</span></p>
-      <p>Copiez ci-dessous et collez dans Google Form :</p>
-      <textarea id="orderSummary" readonly></textarea>
-      <a id="finalizeBtn" href=https://forms.gle/wihwSv37vaWRuCKw5 target="_blank">Finaliser l'achat</a>
-    </div>
+    <button id="closeCartBtn" style="float:right; cursor:pointer;">Fermer</button>
+    <h2>Votre panier</h2>
+    <ul id="cartItems" style="list-style:none; padding:0;"></ul>
+    <p>Total : <span id="cartTotal">$0</span></p>
+    <textarea id="orderSummary" rows="6" style="width:100%;"></textarea>
   </div>
+
+  <div id="vehicleList"></div>
 
   <script>
     const vehicles = [
       ["Elegy Retro Custom", 904000],
-      ["Sultan RS", 795000],
-      ["Dominator GTX", 725000],
-      ["Buffalo", 95000],
-      ["Raiden", 1375000],
-      ["Jester", 240000],
-      ["Itali RSX", 2598000],
-      ["Neo", 1875000],
-      ["Comet S2 Cabrio", 1797000],
-      ["Itali GTO", 1965000],
-      ["Omnis e-GT", 1795000],
-      ["Neon", 1500000],
-      ["Coquette D10", 1510000],
-      ["Adder", 1000000],
-      ["Alpha", 72000],
-      ["Ardent", 1450000],
-      ["Autarch", 2270000],
-      ["Banshee 900R", 565000],
-      ["Bestiary GTS", 1700000],
-      ["Bifta", 20000],
-      ["Buffalo S", 35000],
-      ["Buffalo STX", 65000],
-      ["Carbonizzare", 195000],
-      ["Comet SR", 975000],
-      ["Coquette BlackFin", 577000],
-      ["Cyclone", 2850000],
-      ["Cheetah Classic", 665000],
-      ["Cognoscenti 55", 195000],
-      ["Elegy RH8", 0],
-      ["Emerus", 2750000],
-      ["Entity XF", 795000],
-      ["Feltzer", 150000],
-      ["FMJ", 1535000],
-      ["Furore GT", 795000],
-      ["Fusilade", 26000],
-      ["Gauntlet Hellfire", 745000],
-      ["Grotti Itali GTB", 132000],
       ["Grotti Turismo R", 500000],
       ["Infernus Classic", 440000],
       ["Ignus", 1900000],
@@ -113,6 +43,7 @@
       ["Lynx", 1900000],
       ["Massacro", 195000],
       ["Monroe", 890000],
+      ["Neon", 1570000],
       ["Nero", 1440000],
       ["Nero Custom", 1560000],
       ["Ninef", 225000],
@@ -140,38 +71,41 @@
       ["Zorrusso", 1845000]
     ];
 
-    const vehicleList = document.getElementById('vehicleList');
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
-    function formatPrice(n) {
-      return '$' + n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    }
-
-    function updateCount() {
-      document.getElementById('cartCount').textContent = cart.length;
-    }
-
-    function calcTotal() {
-      return cart.reduce((s, v) => s + v[1], 0);
-    }
+    const formatPrice = n => '$' + n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    const updateCount = () => document.getElementById('cartCount').textContent = cart.length;
+    const calcTotal = () => cart.reduce((s, v) => s + v[1], 0);
 
     function renderCart() {
       const items = document.getElementById('cartItems');
       items.innerHTML = '';
-      cart.forEach(v => {
+      cart.forEach((v, index) => {
         const li = document.createElement('li');
         li.textContent = `${v[0]} - ${formatPrice(v[1])}`;
+        const removeBtn = document.createElement('button');
+        removeBtn.textContent = '🗑️';
+        removeBtn.onclick = () => {
+          cart.splice(index, 1);
+          localStorage.setItem('cart', JSON.stringify(cart));
+          updateCount();
+          renderCart();
+        };
+        li.appendChild(removeBtn);
         items.appendChild(li);
       });
+
+      const buyerName = document.getElementById('buyerName').value;
       document.getElementById('cartTotal').textContent = formatPrice(calcTotal());
       document.getElementById('orderSummary').value =
+        'Acheteur : ' + (buyerName || 'Non renseigné') + '\n' +
         cart.map(v => `${v[0]} (${formatPrice(v[1])})`).join('\n') +
         '\n\nTotal : ' + formatPrice(calcTotal());
     }
 
     document.getElementById('openCartBtn').addEventListener('click', () => {
       renderCart();
-      document.getElementById('cartModal').style.display = 'flex';
+      document.getElementById('cartModal').style.display = 'block';
     });
 
     document.getElementById('closeCartBtn').addEventListener('click', () => {
@@ -179,13 +113,18 @@
     });
 
     updateCount();
-    vehicles.forEach(v => {
+
+    const vehicleList = document.getElementById('vehicleList');
+    vehicles.forEach((v, i) => {
       const card = document.createElement('div');
       card.className = 'vehicle-card';
+
       const title = document.createElement('h3');
       title.textContent = v[0];
+
       const price = document.createElement('p');
       price.textContent = formatPrice(v[1]);
+
       const btn = document.createElement('button');
       btn.textContent = 'Ajouter au panier';
       btn.onclick = () => {
